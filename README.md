@@ -42,8 +42,27 @@ created kube proxy provides a new ip address to that pod.
 
 
 ## kubectl
-kubectl uses for interacting with api server
+kubectl uses for interacting with api server. The admin or user both
+need to access api server to fulfill their purpose. 
 
+### Context
+context is used for changing the default namespace permanently. 
+
+> $ kubectl config set-context my-context --namespace=mystuff <br>
+> $ kubectl config use-context my-context
+
+first line creates the new context, second line use the newly created
+context.
+
+### Basic Commands
+
+> $ kubectl apply -f obj.yaml
+
+Creates an object, 
+
+> $ kubectl delete -f obj.yaml
+
+deletes an object
 
 >$ kubectl get componentstatuses
 
@@ -56,7 +75,7 @@ gets the basic information about nodes, and list up the nodes
 >$ kubectl describe nodes _node_name_
 
 gets all the information about a specific node. 
-## Cluster Components
+## CLUSTER COMPONENTS
 ### Kubernetes Proxy
 kubernetes proxy is responsible for routing network traffic to
 load-balanced service in the cluster. For load balancing 
@@ -76,4 +95,8 @@ be one or more DNS servers. <br>
 
 It starts up a proxy server to access the UI. The server starts 
 on _localhost:8001_
+
+## POD
+### Service
+Service is basically a static or a permanant  
 
