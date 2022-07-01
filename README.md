@@ -1,6 +1,12 @@
 # Kubernetes
 
 ## ARCHITECTURE
+
+3 process must need to be installed on every node.
+1. Container Runtime (Docker, Kubelet (manage containers) etc.)
+2. Services. (Load balancing and communication)
+3. Kube Proxy 
+
 ## Master Node
 ### - API Server
 It is the center point of all sort of communication. Every request
@@ -56,7 +62,88 @@ context.
 
 ### Basic Commands
 
-> $ kubectl apply -f obj.yaml
+> $ kind delete cluster <br>
+> $ kind create cluster <br>
+
+### Get
+> $ kubectl get pods <br>
+
+> $ kubectl get services <br>
+
+> $ kubectl get deployments<br>
+
+> $ kubectl get replicaset<br>
+
+### Create:
+> $ kubectl create -h<br>
+
+shows all the create commands, objects which can be created.
+
+usages:
+> $ kubectl create -f FILENAME [options] <br>
+
+> $ kubectl create deployment nginx-test --image=nginx  <br>
+
+Here nginx-test is the deployment name and nginx is the container image name.
+It is the most optimized format. You just have to give a deployment name and an 
+image that it will run. 
+
+### Edit
+> $ kubectl edit deployment nginx-test <br>
+
+nginx-edit is the deployment name
+
+### Debug
+> $ kubectl log [pod name]
+
+> $ kubectl logs nginx-test-847f5bc47c-v8lm8<br>
+
+it shows the log information of the container image that is running inside the 
+pod. 
+
+> $ kubectl describe obj [obj_name]
+
+>$ kubectl describe nodes [node_name]<br>
+>$ kubectl describe pod [pod_name]
+
+gets all the information about a specific node.
+
+>$ kubectl exec -it [pod name]
+
+with this command we can get into the terminal of that pod. <br>
+-it stands for interactive terminal.
+
+
+### Delete
+> $ kubectl delete deployment [deployment name]
+
+It deletes the deployment along with the replicaset and pods.
+
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+> $ kubectl apply -f obj.yaml <br>
+
+
+
+
+### Apply
+It's hard to write every information in the commandline. so we create a yaml 
+configuration file and apply it. If the oject name is obj.yaml then we can write
+> $ kubectl apply -f obj.yaml <br>
 
 Creates an object, 
 
@@ -72,9 +159,7 @@ gets the components of the cluster
 
 gets the basic information about nodes, and list up the nodes
 
->$ kubectl describe nodes _node_name_
 
-gets all the information about a specific node. 
 ## CLUSTER COMPONENTS
 ### Kubernetes Proxy
 kubernetes proxy is responsible for routing network traffic to
@@ -148,5 +233,3 @@ Multiple deployments can not be created for stateful set like database, because
 replica pods access volume concurrently. This is why database type of pods  
 need to be created by statefulSet instead of deploy. 
 
-
-### 
