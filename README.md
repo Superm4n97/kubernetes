@@ -96,7 +96,57 @@ be one or more DNS servers. <br>
 It starts up a proxy server to access the UI. The server starts 
 on _localhost:8001_
 
-## POD
-### Service
-Service is basically a static or a permanant  
+## KUBERNETES COMPONENTS
+### POD
+POD is the basic component of kubernetes. POD consists of containers inside it.
+Usually we put a single container inside a POD. POD gets an internal ip address. POD's 
+communicate among themselves with that ip address.
 
+### Service
+POD's dies rapidly, so when a new pod is created a new ip should need to assign 
+along it which is pretty inconvenient. Here comes the concept of services. Service is
+a static ip address that is attached along each pod. Lifecycles of a service and pod 
+are not connected, so when a pod dies service remains along with it's ip address. 
+ Pods communicate with each other with service.<br>
+
+Service has 2 functionalities:<br>
+1. Permanent IP address
+2. Load balancer
+### Ingress
+Service is divided into two categories, Internal and External. User request first 
+goes to ingress then the request is forwarded according to the service. 
+
+### ConfigMap
+ConfigMap contains some mapped information. Suppose we need to access a pod using 
+its service, if we change the name of the service then we again need to push and 
+pull that pod. Instead of this we can use a generic configuration mapping that we do 
+not need to change the whole thing. 
+
+### Secret
+Secret is also a map, but the values in secret is stored in base64 encoded.
+Secret is used to store the credentials and authentication information. 
+
+### Volume
+When a container is declared, if it stores data, when the container will restart 
+everything will be gone. so to store data permanently we use volumes along the 
+pods to store data. The volume is mounted by the developer to some external local 
+storage. 
+
+### Deployment
+Suppose a single pod application, when the application dies m the user will 
+have a downtime of a server which is a bad user experience. <br>
+Here comes the main advantage of the distribution system. In the distribution system we 
+can have many replicas of a single application. In kubernetes to create another application 
+replica we do not need to create another node. Instead of that we can make a 
+blueprint and specify there how many copy we want. This blueprint is called 
+deployment. So deployment is a script, using which we can create as many application
+replica as we want. So we basically create deployment and deployment will create pods.
+>deployment -> pods -> container
+
+### StatefulSet
+Multiple deployments can not be created for stateful set like database, because 
+replica pods access volume concurrently. This is why database type of pods  
+need to be created by statefulSet instead of deploy. 
+
+
+### 
