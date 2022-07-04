@@ -84,6 +84,10 @@ see if the kubectlst image is running or not, then restart the kubectlst image a
 
 > $ kubectl get replicaset<br>
 
+>$ kubectl get componentstatuses
+
+gets the components of the cluster
+
 ### Create:
 > $ kubectl create -h<br>
 
@@ -127,7 +131,6 @@ gets all the information about a specific node.
 with this command we can get into the terminal of that pod. <br>
 -it stands for interactive terminal.
 
-
 ### Delete
 > $ kubectl delete deployment [deployment name]
 
@@ -135,23 +138,51 @@ It deletes the deployment along with the replicaset and pods.
 
 ### Apply
 It's hard to write every information in the commandline. so we create a yaml 
-configuration file and apply it. If the oject name is obj.yaml then we can write
+configuration file and apply it. If the object name is obj.yaml then we can write
 > $ kubectl apply -f obj.yaml <br>
 
-Creates an object, 
+Creates an object from the yaml file, 
 
 > $ kubectl delete -f obj.yaml
 
+To know more about yaml deployment file check their [official repository](https://github.com/kubernetes/api/blob/master/core/v1/types.go)
+
 deletes an object
 
->$ kubectl get componentstatuses
+### Health Check
+#### Liveness Probe:
+Liveness probe is a segment of yaml code that continuously checks if the 
+server container is live or not. It should be written for each of the object separately.
+#### why it is used? 
+Kubernetes only checks if the server is running or not, if not then kubernetes 
+restarts it. But what if the internal program of a container caused deadlocks?
+the server is still running, but it is not workable. That is why we use health 
+checks. Liveness is one kind of health checks.
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuard
+spec:
+  containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:blue
+        name: kuard
+        livenessProbe:
+          httpGet:
+            path: /healthy
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+ ```
 
-gets the components of the cluster
-
->$ kubectl get nodes
-
-gets the basic information about nodes, and list up the nodes
-
+#### Readiness Probe:
+It checks if the server is ready to serve the client or not. 
 
 ## CLUSTER COMPONENTS
 ### Kubernetes Proxy
@@ -226,3 +257,66 @@ Multiple deployments can not be created for stateful set like database, because
 replica pods access volume concurrently. This is why database type of pods  
 need to be created by statefulSet instead of deploy. 
 
+## Resource Management
+### Resource Requests and Limits:
+It specifies how much resource a pod will consume. 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+ name: kuard
+spec:
+ containers:
+   - image: gcr.io/kuar-demo/kuard-amd64:blue
+     name: kuard
+     resources:
+       requests:
+         cpu: "500m"
+         memory: "128Mi"
+       limits:
+        cpu: "1000m"
+        memory: "256Mi"
+     ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+```
+
+Suppose that we create a Pod with this container that requests 0.5 CPU. Kubernetes
+schedules this Pod onto a machine with a total of 2 CPU cores.
+As long as it is the only Pod on the machine, it will consume all 2.0 of 
+the available cores, despite only requesting 0.5 CPU. <br>
+If a second Pod with the same container and the same request of 0.5 CPU lands on
+the machine, then each Pod will receive 1.0 cores.<br>
+If a third identical Pod is scheduled, each Pod will receive 0.66 cores.<br>
+Finally, if a fourth identical Pod is scheduled, each Pod will receive the 0.5 core it requested, and
+the node will be at capacity.<br><br>
+
+**_request_ sets the lower bound of the resource that the application will consume, 
+we can also set the higher bound of the resource by using _limits_. It will specify
+ the maximum amount of resource that the pod will use** <br>
+
+by using _requests_ and _limits_ we can specify the resource interval of a 
+pod.
+### Volume Mount:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuard
+spec:
+  volumes:
+    - name: "kuard-data"
+      hostPath:
+        path: "/var/lib/kuard"
+  containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:blue
+      name: kuard
+      volumeMounts:
+        - mountPath: "/data"
+          name: "kuard-data"
+      ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+```
