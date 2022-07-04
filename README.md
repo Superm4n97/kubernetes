@@ -1,35 +1,35 @@
 # Kubernetes
 
-## ARCHITECTURE
+## 1. ARCHITECTURE
 
 3 process must need to be installed on every node.
 1. Container Runtime (Docker, Kubelet (manage containers) etc.)
 2. Services. (Load balancing and communication)
 3. Kube Proxy 
 
-## Master Node
-### - API Server
+## 1.1 Master Node
+### 1.1.1 - API Server
 It is the center point of all sort of communication. Every request
 comes into the api server, and it forwards the request into the 
 responsible point.
 
-### - etcd Cluster
+### 1.1.2 - etcd Cluster
 It is the database of the system. It keeps the information about 
 the containers, pods and other things.
 
-### - Controller Manager
+### 1.1.3 - Controller Manager
 It checks whether actual_state = desired_state. It finds the 
 information about the actual state form the etcd cluster through the api server.
 It also sends the desired action that need to be taken to the api 
 server. 
 
-### - Kube Scheduler
+### 1.1.4 - Kube Scheduler
 It takes all the actions, it performs the specific task that 
 has been told from the api server. It does not take any decision, 
 it just performs the actions. 
 
-## Worker Node
-### - POD 
+## 1.2 Worker Node
+### 1.2.1 - POD 
 POD is the smallest unit of kubernetes. POD contains containers
 inside it. A pod contains an ip address. A pod can have more than
 one container, but the best practice is to keep a single container 
@@ -37,17 +37,17 @@ in a pod. The containers inside the pod are tightly coupled, so
 whenever a container fails all the container fails, and the pod is
 killed. Again only the pods consist of ip address not the containers.
 
-### - Kubelet
+### 1.2.2 - Kubelet
 It manages the pods. Kubelet controls the pods also the containers
 inside the pods. If a pod or a container needs to be created or 
 deleted kubelet does it.
 
-### - Kube Proxy
+### 1.2.3 - Kube Proxy
 it provides ip addresses to the specific pods. When a new pod is 
 created kube proxy provides a new ip address to that pod.
 
 
-## kubectl
+## 1.3 kubectl
 kubectl uses for interacting with api server. The admin or user both
 need to access api server to fulfill their purpose. 
 
@@ -60,7 +60,17 @@ context is used for changing the default namespace permanently.
 first line creates the new context, second line use the newly created
 context.
 
-### Basic Commands
+## Basic Commands
+
+### kind
+> $ kind cluster
+
+It will show all commands of kind. <br> If kind is not running then try this:
+>$ docker ps<br>
+
+see if the kubectlst image is running or not, then restart the kubectlst image as,
+>$ docker restart [63a0c7828de2 - container id/name]
+
 
 > $ kind delete cluster <br>
 > $ kind create cluster <br>
@@ -94,12 +104,16 @@ image that it will run.
 nginx-edit is the deployment name
 
 ### Debug
-> $ kubectl log [pod name]
+> $ kubectl logs [pod name]
 
 > $ kubectl logs nginx-test-847f5bc47c-v8lm8<br>
 
 it shows the log information of the container image that is running inside the 
 pod. 
+
+>$ kubectl describe [obj]<br>
+>$ kubectl describe pod
+
 
 > $ kubectl describe obj [obj_name]
 
@@ -118,27 +132,6 @@ with this command we can get into the terminal of that pod. <br>
 > $ kubectl delete deployment [deployment name]
 
 It deletes the deployment along with the replicaset and pods.
-
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-> $ kubectl apply -f obj.yaml <br>
-
-
-
 
 ### Apply
 It's hard to write every information in the commandline. so we create a yaml 
