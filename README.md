@@ -136,6 +136,10 @@ with this command we can get into the terminal of that pod. <br>
 
 It deletes the deployment along with the replicaset and pods.
 
+> $kubectl delete deployments --all
+
+deletes all the deployments.
+
 ### Apply
 It's hard to write every information in the commandline. so we create a yaml 
 configuration file and apply it. If the object name is obj.yaml then we can write

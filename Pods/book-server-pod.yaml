@@ -1,0 +1,28 @@
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: book-server
+spec:
+  containers:
+    - image: superm4n/book-api-server:v0.1.3
+      name: server
+      livenessProbe:
+        httpGet:
+          path: /ping
+          port: 8080
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+        periodSeconds: 3
+        failureThreshold: 3
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "128Mi"
+        limits:
+          cpu: "1000m"
+          memory: "256Mi"
+      ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
