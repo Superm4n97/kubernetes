@@ -88,6 +88,18 @@ see if the kubectlst image is running or not, then restart the kubectlst image a
 
 gets the components of the cluster
 
+>$ kubectl get pod -o wide
+
+gets more information than just get pod. 
+
+>$ kubectl get deployment nginx-deployment -o yaml > nginx-deployment.yaml
+
+saves the deployment in nginx-deployment.yaml file. But this file 
+will have lots of data. You can use this command to debug a 
+deployment or create a copy of that. This command is also 
+applicable for pods and services.
+
+
 ### Create:
 > $ kubectl create -h<br>
 

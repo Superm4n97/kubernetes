@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"name":"book-server","namespace":"default"},"spec":{"containers":[{"image":"superm4n/book-api-server:v0.1.3","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/ping","port":8080},"initialDelaySeconds":5,"periodSeconds":3,"timeoutSeconds":1},"name":"server","ports":[{"containerPort":8080,"name":"http","protocol":"TCP"}],"resources":{"limits":{"cpu":"1000m","memory":"256Mi"},"requests":{"cpu":"500m","memory":"128Mi"}}}]}}
+  creationTimestamp: "2022-07-05T05:52:00Z"
+  name: book-server
+  namespace: default
+  resourceVersion: "65088"
+  uid: f42c8b76-e122-43c6-af1b-f55f6f07cfbb
+spec:
+  containers:
+  - image: superm4n/book-api-server:v0.1.3
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /ping
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 5
+      periodSeconds: 3
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: server
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    resources:
+      limits:
+        cpu: "1"
+        memory: 256Mi
+      requests:
+        cpu: 500m
+        memory: 128Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-tpg2p
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: kind-control-plane
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-tpg2p
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2022-07-05T05:52:00Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2022-07-05T08:57:00Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2022-07-05T08:57:00Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2022-07-05T05:52:00Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://3de432a02af36e4a0e5d04d6bf0f576f9cee2f50156174b024b4155365be73b4
+    image: docker.io/superm4n/book-api-server:v0.1.3
+    imageID: docker.io/superm4n/book-api-server@sha256:9de30cf313f10d32f5098ac655bf0b843012faecf006b3072002f2c7c661605b
+    lastState:
+      terminated:
+        containerID: containerd://b4055225d9647aeb4daba2c56387ea670bb0e93291542427b682dcd42b8acff5
+        exitCode: 255
+        finishedAt: "2022-07-05T08:56:52Z"
+        reason: Unknown
+        startedAt: "2022-07-05T05:52:01Z"
+    name: server
+    ready: true
+    restartCount: 1
+    started: true
+    state:
+      running:
+        startedAt: "2022-07-05T08:57:00Z"
+  hostIP: 172.18.0.2
+  phase: Running
+  podIP: 10.244.0.5
+  podIPs:
+  - ip: 10.244.0.5
+  qosClass: Burstable
+  startTime: "2022-07-05T05:52:00Z"
