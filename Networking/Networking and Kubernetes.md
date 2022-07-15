@@ -161,3 +161,43 @@ some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
     private 1918 range. This bridge passes packets between two connected device.
     Each new container gets one interface automatically attached to the 
     'docker0' bridge.
+
+# 4. Kubernetes Networking Introduction
+    * The Kubernetes networking model
+    * Node and Pod network layout
+        * isolated network
+        * flat network
+        * island network
+        * kube-controller-manager configuration
+    * The Kubelet
+    * Pod Readiness and Probes
+    * The CNI specification
+    * CNI Plugins
+        * The IPAM Interface
+        * Popular CNI plugins
+    * kube-proxy
+        * userspace Mode
+        * iptables Mode
+        * ipvs Mode
+        * kernelspace Mode
+    * NetworkPolicy
+        * NetworkPolicy Example with Cilium
+        * Selecting Pods
+        * Rules
+    * DNS
+    * IPv4/IPv6 Dual Stack
+
+# 5. Kubernetes Networking Abstractions
+    * StatefulSets
+    * Endpoints
+    * Endpoints Slices
+    * Kubernetes Services
+        * NodePort
+        * ClusterIP
+        * Headless
+        * ExternalName Service
+        * LoadBalancer
+        * Services Conclusion
+    * Ingress
+    * Ingress Controllers and Rules
+    * Service Meshes
