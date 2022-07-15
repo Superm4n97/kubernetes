@@ -84,3 +84,80 @@ load balancing mode in kubernetes.
     * Container Connectivity
         * Container to Container
         * Container to Container Separate Hosts
+## Introduction
+### Hypervisor
+Hypervisor is a way to increase one host machine's efficiency and remove 
+the one operating system and networking stack issue. Hypervisor replicate 
+hardware resources (CPU, Memory) to create guest operating system or virtual 
+machines.<br>
+#### Container:
+A running container image
+#### Image:
+A file that creates container
+#### Container Engine:
+A system that accepts command line options to pull container image and run 
+container. ex. Docker
+#### Container Runtime:
+A low level piece of software in a container engine that deals with running a 
+container.
+#### Base Image:
+Starting point of a container image.
+#### Image layer:
+Image layer represent changes between itself and it's parent layer.
+#### Image format:
+A container engine have their own container format. such as Docker
+#### Registry:
+A remote server that stores images such as [Docker Hub](https://hub.docker.com/)
+#### Repositories:
+Layers of container images. 
+#### Tag:
+User defined name that represent the version of an image. 
+#### Container Host:
+The system that runes the container image. Ex: Local machine
+
+### Container Functionality
+Low level functionality:
+    
+    1. Creating containers
+    2. Running containers
+
+High level functionality:
+
+    1. Formatting container image
+    2. Building container image
+    3. Managing container image
+    4. Managing instances of conatainer
+    5. Sharing container image
+
+## Container Primitives
+### RunC
+No matter if you are using Docker or Containerd, RunC create and manages the actual 
+container for them. Each of our container has Linux primitives called _control 
+groups_ and _namespace_. 
+
+### Control Groups
+Cgroups control access to resources in the kernel for our container.
+
+### Namespace
+Namespaces are features of linux kernel that isolate and virtualize system 
+resources of a collection of process. Such as, our main kernel runs process 
+with unique process id's. A container has its own process with own PIDs. Docker 
+bipasses these process to our kernel with other different PIDs. Docker runs the 
+processes of a container in the Host OS. <br><br>
+
+Bridge creates virtual ethernet (VETH) to connect node ethernet and container 
+ethernet.
+<br> 
+### Container Networking Modes
+It defines how a container connected to the host.
+<br>**Bridge:** Default, creates a private network for container for communicate 
+with the host.
+<br>**Host:** The container shares the same IP address of the host. 
+<br>
+some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
+
+    When a docker starts, it creates a virtual bridge interface (docker0),
+    on the host machine and assigns packets it a random ip address from the 
+    private 1918 range. This bridge passes packets between two connected device.
+    Each new container gets one interface automatically attached to the 
+    'docker0' bridge.
