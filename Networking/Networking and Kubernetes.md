@@ -182,6 +182,9 @@ some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
     * CNI Plugins
         * The IPAM Interface
         * Popular CNI plugins
+            * Cilium
+            * Flannel
+            * Calico
     * kube-proxy
         * userspace Mode
         * iptables Mode
@@ -254,6 +257,10 @@ According to the specification, there are four operation that a CNI must support
 **VERSION:** Version information of the plugin.<br><br>
 
 The container runtime performs these CNI commands to CNI plugin, which next configure the network.
+<br>
+There are two interfaces in CNI spec
+* CNI plugins
+* IP Address Management (IPAM) plugin
 
 ## CNI Plugins
 Two primary responsibilities:
@@ -266,6 +273,8 @@ There are two broad categories of CNI network model.
 1. **Flat Network:** CNI drivers uses ip address from the cluster network. So cluster network needs many available ip address.
 2. **Overlay Network:** CNI driver creates a virtual network within the Kubernetes, which uses the cluster network to send packets.
 
+## IPAM Plugin
+IP Address Management helps to avoid the duplicate IP address. 
 
 # 5. Kubernetes Networking Abstractions
     * StatefulSets
