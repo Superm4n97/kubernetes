@@ -1,5 +1,29 @@
 # OSI and TCP models
 # Networking in Linux
+
+    This Chapter contains:
+    * The Network Interface
+    * The Bridge Interface
+    * Packet Handeling in karnel
+        * netfilter
+        * Connreack
+        * Routing
+    * High Level Routing
+        * iptables
+        * IPVS
+        * eBPF
+    * Network Troubleshooting Tools
+        * Security Warning
+        * ping
+        * traceroute
+        * dig
+        * telnet
+        * nmap
+        * netstat
+        * netcat
+        * Openssl
+        * cURL
+
 ### Netfilter
 ![netfilter hooks](netfilter.png)
 There are mainly five types of hooks
@@ -14,7 +38,8 @@ iptables can be used to create firewalls and audit logs, mutate and reroute
 packets, and even implement crude connection fan-out. iptables uses Netfilter. 
 Netfilter can intercept (stop) and mutate (change) packets.<br>
 iptables components
-> tables -> chains -> rules
+    
+    tables -> chains -> rules
 
 table contains chains, chain contains rules.<br>
 There are five types of tables 
@@ -41,32 +66,9 @@ IP Virtual Server is a Linux connection load balancer. IPVS support multiple
 load balancing mode in kubernetes.
 ![IPVS modes](ipvs%20load%20balancing.png)
 
- You van create load balancers by running:
+You van create load balancers by running:
 
-> $ ipvsadm -A -t <'address'> -s <'mode'>  
-
-    This Chapter contains:
-    * The Network Interface
-    * The Bridge Interface
-    * Packet Handeling in karnel
-        * netfilter
-        * Connreack
-        * Routing
-    * High Level Routing
-        * iptables
-        * IPVS
-        * eBPF
-    * Network Troubleshooting Tools
-        * Security Warning
-        * ping
-        * traceroute
-        * dig
-        * telnet
-        * nmap
-        * netstat
-        * netcat
-        * Openssl
-        * cURL
+> $ ipvsadm -A -t <'address'> -s <'mode'>
 
 # 3. Container Networking Basics
     This Chapter contains:
@@ -162,6 +164,11 @@ some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
     Each new container gets one interface automatically attached to the 
     'docker0' bridge.
 
+## Container Network Interface (CNI)
+* CNI defines a standard interface to manage a container's network.
+* CNI plugin is responsible for assigning pod IP address and maintaining a rout between pods
+
+
 # 4. Kubernetes Networking Introduction
     * The Kubernetes networking model
     * Node and Pod network layout
@@ -186,6 +193,79 @@ some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
         * Rules
     * DNS
     * IPv4/IPv6 Dual Stack
+
+Kubernetes looks to solve these four issues:
+1. Highly coupled container-to-container communication
+2. Pod-to-Pod communication
+3. Pod-to-Service communication
+4. External-to-Service communication
+
+* CNI plugin manages pod IP address and individual container network
+* Every kubernetes node runes a component called Kubelet 
+* Kubelet manage the pods with API interaction with CNI plugins, 
+
+### Cluster's Network Structures
+1. Isolated Network
+Host outside the cluster can reach a host inside the cluster but pods are not.
+Pod can not reach other pods outside the cluster. Pods can be accessed by any other pods inside the cluster.
+2. Flat Network
+All pods can be accessible from inside and outside the cluster. Pods consist an ip address. 
+3. Island Network
+Combination of Isolated and Flat network. Nodes are accessible from border network, But pods are not. To access the pods we have to use NAT for communication.
+
+## Kubelet
+* It runs on every worker node.
+* Responsible for managing pods.
+* Coordinator for other software on the node.
+* Manage container network (via CNI) and container runtime (via CRI).
+
+When a controller/user creates a yaml file for creating an object (let's assume a pod), initially it exists as API object.
+The Kubernetes **scheduler** watches for a pod and attempts to select a valid node for it. The node selection depend on several things, such as how much CPU/memory it will take and
+which node can provide it. When the scheduler finds a node with that matches the pods constrains, then the scheduler writes that 
+node's name in the pod's nodeName field. Let's say Kubernetes schedules the pod to "node-1":
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: example
+spec:
+    nodeName: "node-1"
+    containers:
+        - name: example
+        image: example:1.0
+```
+The **Kubelet** of "node 1" watches for all pods scheduled to it. When the Kubelet observes that a pod exists but not present 
+in the node, it creates it. A container is created with the help of **CRI**. Once the container exists the Kubelet makes an 
+ADD call to the **CNI** which tells the **CNI plugin** to create the pod network.
+
+## Pod Readiness and Probes
+* It indicates whether a pod is ready to serve traffic.
+* Readiness determines whether a pod address is shows up in the Endpoints object from the external source.
+* Probe is diagnostic (Health check) for performed periodically by the Kubelet on a container.
+
+### Cluster Dataflow between Components
+![cluster data flow between components](Cluster Dataflow between components.png)
+
+## The CNI Specification
+According to the specification, there are four operation that a CNI must support:<br>
+**ADD:** Add a container to the network.<br>
+**DEL:** Delete a container from the network.<br>
+**CHECK:** Return an error if there is a problem with the container's network.<br>
+**VERSION:** Version information of the plugin.<br><br>
+
+The container runtime performs these CNI commands to CNI plugin, which next configure the network.
+
+## CNI Plugins
+Two primary responsibilities:
+1. Assign and allocate unique IP addresses for pods
+2. Ensure that routes exist within Kubernetes to each pod IP address.
+
+<br>
+
+There are two broad categories of CNI network model.
+1. **Flat Network:** CNI drivers uses ip address from the cluster network. So cluster network needs many available ip address.
+2. **Overlay Network:** CNI driver creates a virtual network within the Kubernetes, which uses the cluster network to send packets.
+
 
 # 5. Kubernetes Networking Abstractions
     * StatefulSets
