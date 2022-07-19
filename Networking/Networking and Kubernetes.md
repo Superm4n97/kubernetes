@@ -273,8 +273,65 @@ There are two broad categories of CNI network model.
 1. **Flat Network:** CNI drivers uses ip address from the cluster network. So cluster network needs many available ip address.
 2. **Overlay Network:** CNI driver creates a virtual network within the Kubernetes, which uses the cluster network to send packets.
 
-## IPAM Plugin
+### IPAM Plugin
 IP Address Management helps to avoid the duplicate IP address. 
+
+
+## kube-proxy
+Per node daemon 
+* kube-proxy get request form service and carry and load balance to a pod.
+* Provide basic load balancing functionality within the cluster.
+* **Endpoint or Endpoint Slices** is a list of ready pod IPs
+* Services define a load balancer for a set of pods.
+* Most of the services have an IP address for that service, it's called cluster IP address. which is not routable outside the cluster.
+
+Request comes to the kube-proxy and kube-proxy is responsible for routing request to service's cluster.
+There are alternatives to kube-proxy, Such as replace mode of Cilium.<br>
+Kube proxy has four modes:
+1. userspace
+2. iptables
+3. ipvs
+4. kernelspace
+
+These modes change the runtime and exact feature set of kube-proxy.
+
+### userspace Mode
+In userspace mode kube-proxy runs a web server and routes all service IP addresses to the web server, using **iptables**
+userspace mode is no longer commonly used, and it is suggested to avoid.
+
+### iptables Mode (default) 
+* In iptables mode kube-proxy establish a connection to a backend pod.
+* All request made using that connection will go in the same pod until the connection is terminated.
+* in iptables mode it gets an ip address from **iptable** then user connection based load balancing.
+
+### ipvs Mode
+* Instead of iptables for connection based load balancing it uses IPVS.
+There are six load balancing modes in ipvs:
+1. rr : Round Robin (default)
+2. lc: Least Connection
+3. dh: Destination hashing
+4. sh: Source hashing
+5. sed: Shortest expected delay
+6. nq: Never queue
+
+### kernelspace Mode
+* Newest 
+* Alternative to userspace mode for Kubernetes on Windows, as iptables and ipvs are specific to linux.
+
+
+## NetworkPolicy
+By default, pods in a same namespace can have the access of other pods. To restrict the access NetworkPolicy is added.
+It is a namespaced object, so that it can be grouped in a namespace.
+
+## DNS
+There are four options for dnsPolicy
+1. Default 
+2. ClusterFirst
+3. ClusterFirstWithHostNet
+4. None
+
+If None then the developer will have to specify name servers in the pod spec
+
 
 # 5. Kubernetes Networking Abstractions
     * StatefulSets
