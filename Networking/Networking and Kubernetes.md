@@ -347,3 +347,75 @@ If None then the developer will have to specify name servers in the pod spec
     * Ingress
     * Ingress Controllers and Rules
     * Service Meshes
+
+## StatefulSet
+
+
+
+
+
+
+
+
+## Endpoints
+* helps to identify what pods are running.
+* created and managed by services.
+
+Each endpoint contains a list of ports and two list of address ready and unready. An address is listed in ready list from
+notReady list after passing the readiness checks.<br>
+
+These commands show the information about endpoints.
+```yaml
+$ kubectl get endpoints
+$ kubectl get endpoints <'endpointName'>
+$ kubectl describe endpoints <'endpointName'>
+```
+
+### EndpointSlices
+In a big cluster, there can be a thousand of node and tens of thousand of pods. That means a thousand of kube-proxy watching
+the endpoint. When the address of the pod updated it affects the whole endpoint. The address updates rapidly which cause
+a great strain on etcd.<br>
+To resolve this issue endpoint slices are introduced. EndpointSlices is an array of list of address.<br>
+Kubernetes service creates one endpoint for all pods int the service. A service creates multiple endpoint slices, each containing 
+a subset of pods. 
+
+## Kubernetes Services
+Service is a load balancing abstraction within a cluster.<br>
+
+Pods are situated inside the node. So as an external user we can not access the pod. 
+But we can access the node as the node is in the same network as us (out laptop). 
+
+### NodePort Service
+
+NodePort service can be accessible from the outside of the cluster. But it should be a public cluster and 
+contain a public ip. Using this service external user can connect to the pods.
+<br>
+
+In nodePort service a service listen to a certain port of a node, and forward it to a specific target port of a pod. 
+
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: demo-service
+spec:
+    type: NodePort
+    selector:
+        app: demo
+    ports:
+        - port: 80
+        targetPort: 80
+        nodePort: 30000
+```
+
+
+The **nodePort** 30000 field of the yaml file defines that this service will expose to the
+30000 port of the node. The **nodePort** field can be left blank, in this scenario the kube-controller-manager 
+will choose a random port in the range of 30000-32767. **targetPort** 80 defines the port of the pod which maps the **port** 80 
+of the service. You can read more about Nodeport [here](https://github.com/Superm4n97/Kubernetes/blob/main/Services/Services.md#1-nodeport).
+
+![Nodeport](nodePort.png)
+
+
+### ClusterIP

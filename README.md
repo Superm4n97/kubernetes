@@ -99,6 +99,9 @@ will have lots of data. You can use this command to debug a
 deployment or create a copy of that. This command is also 
 applicable for pods and services.
 
+> $ kubectl get pods -w
+
+for watching the pods realtime.
 
 ### Create:
 > $ kubectl create -h<br>

@@ -10,8 +10,18 @@ The image above shows the construction of a service. But how a service will know
 the target port of belong to which pod. That is why the label and selectors are 
 used. node ports are limited within range 30000-32767
 ![selector](Selector.png)
+
+If the pods are situated in multiple nodes, you don't have to do anything to access them.
+The service will listen to the specific port of all the nodes and distributes them
+among the pods, as long as their labels matches.
+
+![multiple nodes](nodePort2.png)
+
 Labels of the pod is used as a selector in the service. Recomanded rules for 
 [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)
+
+
+
 
 ### 2. ClusterIP
 ### 3. LoadBalancer
