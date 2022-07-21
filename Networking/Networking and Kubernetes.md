@@ -355,8 +355,6 @@ If None then the developer will have to specify name servers in the pod spec
 
 
 
-
-
 ## Endpoints
 * helps to identify what pods are running.
 * created and managed by services.
@@ -419,3 +417,32 @@ of the service. You can read more about Nodeport [here](https://github.com/Super
 
 
 ### ClusterIP
+* Can only be accessible within the cluster.
+* Default type service
+
+### ExternalName
+* Uses dns names instead of selectors
+
+### LoadBalancer
+* Cloud provider's loadBalancer
+* Handle L4 traffic where Ingress handle L7 traffic
+* The cloud load balancer will determine how to distribute traffic
+
+## Ingress
+* L7 load balancer and accessible externally
+* It can be a single entry point of an architecture.
+* It routes only HTTP traffic to services
+* It is possible to use multiple ingress, using **IngressClass** (which is an ingress controller)
+
+There are two component of Ingress:
+* **Controller** : manage ingress pods
+* **Rules** : define how the traffic is routed.
+
+### Controller
+In kubernetes controller is a software that is responsible for managing typical 
+resources type (pod,node,deployment etc.). We called ingress implementations ingress _controller_
+* External load balancer controller
+* Internal load balancer controller
+
+## Service Mesh
+
