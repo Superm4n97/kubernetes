@@ -77,16 +77,10 @@ see if the kubectlst image is running or not, then restart the kubectlst image a
 
 ### Get
 > $ kubectl get pods <br>
-
 > $ kubectl get services <br>
-
 > $ kubectl get deployments<br>
-
 > $ kubectl get replicaset<br>
-
->$ kubectl get componentstatuses
-
-gets the components of the cluster
+>$ kubectl get componentstatuses [gets the components of the cluster]
 
 >$ kubectl get pod -o wide
 
@@ -102,6 +96,12 @@ applicable for pods and services.
 > $ kubectl get pods -w
 
 for watching the pods realtime.
+
+## Selecting objects on some basis
+>$ kubectl get pods -l app=kuard,version=2 <br>
+
+where -l stands for the labels and labels are separated by (,).
+> $ kubectl get pods --namespace=kube-system
 
 ### Create:
 > $ kubectl create -h<br>
@@ -339,3 +339,117 @@ spec:
           name: http
           protocol: TCP
 ```
+
+# 9. ReplicaSets
+## ReplicaSet
+It creates a set of working pods, and continuously checks whether the current number of pods 
+matching the desired number of pods.<br>
+
+Minimum replica set definition:
+
+```yaml
+apiVersion: extension/v1/beta1
+kind: ReplicaSet
+metadata:
+  name: test-rs
+spec:
+  replicas: 1
+  template:
+    metadata: 
+      labels: 
+        app: test-app
+        version: "2"
+    spec:
+      containers:
+       -  name: app-server
+          image: "dockerset.com/superm4n/apiserver.xyz"
+```
+to scale up or down the replicas you can update the configuration file spec section. For the command line update:
+`$ kubectl scale replicasets test-rs --replicas=4`
+
+## Pod Auto Scaling
+There are two types of pod auto-scaling,
+* Horizontal Auto Scaling (HPA):<br>
+In horizontal auto-scaling the pod changes it replicas. The number of replicas affected in horizontal autoScaling.
+* Vertical Auto Scaling:<br>
+In vertical auto-scaling the pod resource are affected. It changes the CPU/Memory consume by the pod.
+
+There are another type of autoscaling: Cluster autoscaling, which scales the cluster depending on the workload of the cluster.
+
+### Horizontal Pod Autoscaling (HPA):
+>$ kubectl autoscale rs test-rs --min=2 --max=5 --cpu-percent=80
+
+This command auto-scale the test-rs pods between 2 and 5, depending on the threshold value of 
+80% CPU. If a pod contain more than 80% CPU, then it will increase another pod.
+
+
+# 10. Deployments
+
+```yaml
+apiversion: extensions/v1beta1
+kind: Deployment
+metadata: 
+  name: test-dept
+spec:
+  selector:
+    matchLabels:
+      run: test-rs
+  replicas: 1
+  template:
+    metadata: 
+      labels:
+        run: test-pod
+    spec:
+      containers:
+      - name: test-container
+-       image: imageurl.xyz
+```
+
+Deployment manage ReplicaSet which manages pods.
+## Rollout
+After you update the deployment it will trigger a rollout, which you can then monitor via the kubectl `rollout` command.
+
+>$ kubectl rollout status deployments test-deploy <br>
+>$ kubectl rollout pause deployments test-deploy [you can pause the rollout]<br>
+>$ kubectl rollout resume deployments test-deploy <br>
+
+You can see the deployment history by running:
+
+>$ kubectl rollout history deployment test-deploy
+
+    deployment.extensions/kuard
+    REVISION CHANGE-CAUSE
+    1          <none>
+    2          Update to green kuard
+The revision is given in oldest to newest. We can view the details about particular revision:
+>$ kubectl rollout history deployment test-deploy --revision=2
+
+You can undo the last rollout:
+>$ kubectl rollout undo deployments test-deploy
+
+If before rollout the history is:
+
+    deployment.extensions/kuard
+    REVISION CHANGE-CAUSE
+    1          <none>
+    2          Update to green kuard
+    3          Update to blue kuard
+
+Then after undoing the history will be:
+
+    deployment.extensions/kuard
+    REVISION CHANGE-CAUSE
+    1          <none>
+    3          Update to blue kuard
+    4          Update to green kuard
+
+Here revision 2 is gone and appeared as revision 4. If we undo it again, then revision 3 
+will appear as revision 5. We can set the history limit upto certain number in the 
+spec.revisionHistoryLimit = 14
+
+## Deployment Strategies
+### Recreate Strategy
+### RollingUpdate Strategy
+## Monitoring a Deployment
+It monitors whether a deployment is dead or not.
+spec.progressDeadlineSecond sets the time that how long the progress will be dead. 
