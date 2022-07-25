@@ -60,9 +60,9 @@ context is used for changing the default namespace permanently.
 first line creates the new context, second line use the newly created
 context.
 
-## Basic Commands
+# Basic Commands
 
-### kind
+## kind
 > $ kind cluster
 
 It will show all commands of kind. <br> If kind is not running then try this:
@@ -75,6 +75,7 @@ see if the kubectlst image is running or not, then restart the kubectlst image a
 > $ kind delete cluster <br>
 > $ kind create cluster <br>
 
+## kubectl
 ### Get
 > $ kubectl get pods <br>
 > $ kubectl get services <br>
@@ -97,7 +98,7 @@ applicable for pods and services.
 
 for watching the pods realtime.
 
-## Selecting objects on some basis
+### Selecting objects on some basis
 >$ kubectl get pods -l app=kuard,version=2 <br>
 
 where -l stands for the labels and labels are separated by (,).
@@ -155,6 +156,11 @@ It deletes the deployment along with the replicaset and pods.
 
 deletes all the deployments.
 
+>$ kubectl delete rs,svc,job -l chapter=jobs
+
+This command deletes the replicaset, service and jobs where the label of that object 
+is `chapter=jobs`
+
 ### Apply
 It's hard to write every information in the commandline. so we create a yaml 
 configuration file and apply it. If the object name is obj.yaml then we can write
@@ -168,8 +174,13 @@ To know more about yaml deployment file check their [official repository](https:
 
 deletes an object
 
-### Health Check
-#### Liveness Probe:
+### rollout
+> $ kubectl rollout status daemonSets my-daemon-set
+
+Some rollout command can be found in the _Up and Running_ **Deployment Rollout** section.
+
+# Health Check
+## Liveness Probe:
 Liveness probe is a segment of yaml code that continuously checks if the 
 server container is live or not. It should be written for each of the object separately.
 #### why it is used? 
@@ -453,3 +464,64 @@ spec.revisionHistoryLimit = 14
 ## Monitoring a Deployment
 It monitors whether a deployment is dead or not.
 spec.progressDeadlineSecond sets the time that how long the progress will be dead. 
+
+# 11. DaemonSets
+ReplicaSet should be used when your application is completely decoupled from the node, and you can 
+run multiple copies on a single given node without special consideration.
+<br>
+DaemonSet should be used when a single copy of your application must run all or a subset of the nodes in the cluster.
+<br>
+
+By default, a DaemonSet will create a copy of a pod on every node unless a node selector is used, which will limit the 
+eligible nodes to those with a matching set labels. DaemonSet determines which node a Pod will run on at Pod creation 
+time by specifying the nodeName field in the Pod spec. As a result, Pods created by DaemonSet are ignored by the Kubernetes scheduler.
+
+## Node Selector
+If spec.nodeSelector is applied to DaemonSet then the pods will be applied only those selected nodes.
+In the DaemonSet spec.nodeSelector section we have to use the labels of the nodes. If the labels of that node changed 
+somehow then the DaemonSet will no longer be applicable to that node. Similarly if we create new node with that 
+node label then the DaemonSet will be applicable to the new node also. 
+
+## Rollout DaemonSet
+## Delete DaemonSet
+
+# 12. Jobs
+Jobs creates a pod that performs a task once. Regular pods keeps restarting in a loop, but a job creates a pod perform 
+a task and exit the pod. By default, a single job creates and runs a single pod. If a pod is fails before a successful 
+termination then the job will recreate the pod with pod template in the job specification.  
+
+## One Shot
+A single pod is created using a single job and perform once. If the pod fails a successfull termination, the job recreates the 
+pod until successfull termination. <br>
+After the completion of the job, the related pod and jobs are still there for log analysis. 
+The `$ kubectl get jobs` command will not show these completed jobs unless you pass flag `-a`. Delete the jobs before continuing.
+> $ kubectl delete jobs oneshot
+
+## Parallelism
+Multiple pods can be created and the can work in parallel. spec.parallelism define a number 
+representing the total number of parallel pods and spec.completions defines the number of pods that will be run 
+parallel
+
+## Work Queues
+
+## CronJob
+It schedules a job to run after a certain period of time. The declaration of a CronJob looks like:
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: example-crone
+spec:
+  #run every fifth hour
+  schedule: "0 */5 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: batch-job
+            image: my-batch-image
+          restartPolicy: onFailure
+```
+Here `spec.schedule` contains the interval for the CronJob in standard cron format.
