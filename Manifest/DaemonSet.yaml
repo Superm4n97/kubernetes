@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemonset
+  labels:
+    k8s: my-ds
+spec:
+  selector:
+    matchLabels:
+      app: ds-pod
+  template:
+    metadata:
+      labels:
+        app: ds-pod
+    spec:
+      containers:
+      - name: ds-container
+        image: superm4n/book-api-server:v0.1.3
