@@ -349,9 +349,50 @@ If None then the developer will have to specify name servers in the pod spec
     * Service Meshes
 
 ## StatefulSet
+A StatefulSet must contain a service with it.<br>
+Stateful set creates pod like deployment but instead of unknown pod name like deployment it creates the pods with a 
+sequential name. (test-sts-0, test-sts-1, test-sts-2).
 
+>$ kubectl get sts
 
+It will show all the stateful sets.
 
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test
+spec:
+  selector:
+    matchLabels:
+      app: server
+  serviceName: "stateful-service"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: superm4n/book-api-server:v0.1.3
+        ports:
+        - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stateful-service
+  labels:
+    service: label
+spec:
+  ports:
+  - port: 8080
+  clusterIP: None
+  selector:
+    app: server
+```
 
 
 

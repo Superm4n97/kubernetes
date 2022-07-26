@@ -25,3 +25,19 @@ Labels of the pod is used as a selector in the service. Recomanded rules for
 
 ### 2. ClusterIP
 ### 3. LoadBalancer
+
+# YAML
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-name #service name can't contain uppercase letter, lowercase,-,numbers allowed
+  labels:
+    field1: field2
+spec:
+  ports:
+  - port: 80
+  clusterIP: None
+  selector:
+    pod: labels #same as the pod labels
+```
