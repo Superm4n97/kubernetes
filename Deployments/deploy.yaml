@@ -1,22 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: nginx
-  name: nginx2
-  namespace: default
+  name: test-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      rasel: hossain
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: nginx
+        rasel: hossain
     spec:
       containers:
-      - image: nginx:1.14.1
-        imagePullPolicy: IfNotPresent
-        name: nginx
+      - name: nginx
+        image: superm4n/test-app:v0.0.1
+        ports:
+        - containerPort: 80

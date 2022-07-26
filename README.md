@@ -95,6 +95,7 @@ deployment or create a copy of that. This command is also
 applicable for pods and services.
 
 > $ kubectl get pods -w
+> $ watch kubectl get pods
 
 for watching the pods realtime.
 

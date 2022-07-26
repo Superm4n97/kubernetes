@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-server
+  labels:
+    apiServer: book-server-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-api-server
+  template:
+    metadata:
+      labels:
+        app: book-api-server
+    spec:
+      containers:
+      - name: api-server
+        image: superm4n/book-api-server:v0.1.3
+        ports:
+        - containerPort: 8080
+
+---
