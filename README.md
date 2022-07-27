@@ -526,3 +526,36 @@ spec:
           restartPolicy: onFailure
 ```
 Here `spec.schedule` contains the interval for the CronJob in standard cron format.
+
+# 13. ConfigMaps and Secrets
+
+Configmap and secret store key pair literals. Where configmap used to store environment variables. Secrets are used to store 
+authentication for a container. 
+
+Creating a configMap:
+```shell
+$ kubectl create configmap my-config \
+ --from-file=my-config.txt \
+ --from-literal=extra-param=extra-value \
+ --from-literal=another-param=another-value
+```
+
+Creating a secret:
+```shell
+$ kubectl create secret generic kuard-tls \
+ --from-file=kuard.crt \
+ --from-file=kuard.key
+```
+
+## Managing a configmaps and secrets
+### Listing
+### Create
+### Update
+
+# 14. Role-Base Access Control (RBAC) for Kubernetes
+RBAC is kind of access management, that gives permission to individuals. There are some terminology in RBAC 
+**identity**, **role bindings**, **control**.
+
+## Identity in Kubernetes
+Every request that comes to Kubernetes is associated with some identity. Kubernetes makes a distinction between user identities 
+and service account identities. Service account identities are associated with components running inside the cluster.

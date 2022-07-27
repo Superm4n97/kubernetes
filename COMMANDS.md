@@ -12,3 +12,10 @@ $ kubectl logs -f POD_NAME
 $ kc logs -f kuard-config
 ```
 The command shows the log information of the pod.
+
+### Get output in YAML
+```shell
+$ kubectl get pod POD_NAME -o yaml
+```
+
+It shows the yaml configuration of a pod. 
