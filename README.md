@@ -62,124 +62,6 @@ context.
 
 # Basic Commands
 
-## kind
-> $ kind cluster
-
-It will show all commands of kind. <br> If kind is not running then try this:
->$ docker ps<br>
-
-see if the kubectlst image is running or not, then restart the kubectlst image as,
->$ docker restart [63a0c7828de2 - container id/name]
-
-
-> $ kind delete cluster <br>
-> $ kind create cluster <br>
-
-## kubectl
-### Get
-> $ kubectl get pods <br>
-> $ kubectl get services <br>
-> $ kubectl get deployments<br>
-> $ kubectl get replicaset<br>
->$ kubectl get componentstatuses [gets the components of the cluster]
-
->$ kubectl get pod -o wide
-
-gets more information than just get pod. 
-
->$ kubectl get deployment nginx-deployment -o yaml > nginx-deployment.yaml
-
-saves the deployment in nginx-deployment.yaml file. But this file 
-will have lots of data. You can use this command to debug a 
-deployment or create a copy of that. This command is also 
-applicable for pods and services.
-
-> $ kubectl get pods -w
-> $ watch kubectl get pods
-
-for watching the pods realtime.
-
-### Selecting objects on some basis
->$ kubectl get pods -l app=kuard,version=2 <br>
-
-where -l stands for the labels and labels are separated by (,).
-> $ kubectl get pods --namespace=kube-system
-
-### Create:
-> $ kubectl create -h<br>
-
-shows all the create commands, objects which can be created.
-
-usages:
-> $ kubectl create -f FILENAME [options] <br>
-
-> $ kubectl create deployment nginx-test --image=nginx  <br>
-
-Here nginx-test is the deployment name and nginx is the container image name.
-It is the most optimized format. You just have to give a deployment name and an 
-image that it will run. 
-
-### Edit
-> $ kubectl edit deployment nginx-test <br>
-
-nginx-edit is the deployment name
-
-### Debug
-> $ kubectl logs [pod name]
-
-> $ kubectl logs nginx-test-847f5bc47c-v8lm8<br>
-
-it shows the log information of the container image that is running inside the 
-pod. 
-
->$ kubectl describe [obj]<br>
->$ kubectl describe pod
-
-
-> $ kubectl describe obj [obj_name]
-
->$ kubectl describe nodes [node_name]<br>
->$ kubectl describe pod [pod_name]
-
-gets all the information about a specific node.
-
->$ kubectl exec -it [pod name]
-
-with this command we can get into the terminal of that pod. <br>
--it stands for interactive terminal.
-
-### Delete
-> $ kubectl delete deployment [deployment name]
-
-It deletes the deployment along with the replicaset and pods.
-
-> $kubectl delete deployments --all
-
-deletes all the deployments.
-
->$ kubectl delete rs,svc,job -l chapter=jobs
-
-This command deletes the replicaset, service and jobs where the label of that object 
-is `chapter=jobs`
-
-### Apply
-It's hard to write every information in the commandline. so we create a yaml 
-configuration file and apply it. If the object name is obj.yaml then we can write
-> $ kubectl apply -f obj.yaml <br>
-
-Creates an object from the yaml file, 
-
-> $ kubectl delete -f obj.yaml
-
-To know more about yaml deployment file check their [official repository](https://github.com/kubernetes/api/blob/master/core/v1/types.go)
-
-deletes an object
-
-### rollout
-> $ kubectl rollout status daemonSets my-daemon-set
-
-Some rollout command can be found in the _Up and Running_ **Deployment Rollout** section.
-
 # Health Check
 ## Liveness Probe:
 Liveness probe is a segment of yaml code that continuously checks if the 
@@ -559,3 +441,105 @@ RBAC is kind of access management, that gives permission to individuals. There a
 ## Identity in Kubernetes
 Every request that comes to Kubernetes is associated with some identity. Kubernetes makes a distinction between user identities 
 and service account identities. Service account identities are associated with components running inside the cluster.
+
+## Roles and Role Bindings
+Identity the first step of kubernetes authorization. Once the system knows the identity of the request then it need to 
+determine if the request is authorized for that user. This is done by role and role bindings.
+<br>
+
+A role is a set of capabilities, capability of doing something.<br>
+A role binding is an assignment of role to some identities. If a role is assign to somebody is will be capable of doing 
+specific tasks.<br>
+
+In kubernetes there are two pairs of related resources that represent roles and role bindings. One pair applies to just a 
+namespace (Role and RoleBinding) while other pair applies across the cluster (ClusterRole and ClusterRoleBinding).<br>
+
+Role resources are namespaced, and represent capabilities within that single namespace. You can not use namespaced roles 
+for non-namespaced resources, and binding a Role Binding to a role only provides authorization within the Kubernetes namespace 
+that contains both the Role and the RoleDefinition.<br>
+
+**Example of a Role:**<br>
+A role that gives an Identity the ability to create and modify Pods and Services.
+
+```yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io.v1
+metadata:
+  namespace: default
+  name: pod-and-services
+rules:
+- apiGroups: [""]
+  resources: ["pods","services"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+```
+
+**Example of a RoleBinding:**<br>
+To bind the Role above to user alice, this role binding also binds the groups mydevs to same role,
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: default
+  name: pods-and-services
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: alice
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: mydevs
+role:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-and-services
+```
+<br>
+
+You can see all the build in role in kubernetes using `$ kubectl get clusterroles`.
+Most of the built-in roles are for the system utilities, only four of them are generic end users:
+* cluster-admin (cluster)
+* admin (namespace)
+* edit (namespace)
+* view (namespace)
+
+You can see the clusterRoleBindings using the command `$ kubectl get clusterrolebindings`, it will show all the bindings 
+that are assign to some identities.<br><br>
+
+There are several Kubernetes RBAC verbs
+
+    Verb (HTTP method)
+    ------------------
+    create (POST)
+    delete (DELETE)
+    get (GET)
+    list (GET)
+    patch (PATCH)
+    update (PUT)
+    watch (GET)
+    proxy (GET)
+
+## Testing Authorization with can-i
+Using built-in can-i command a user can check or validate their authorization in the cluster.
+can-i command is simple to use and takes a verb and a resource:
+
+```shell
+$ kubectl auth can-i create pods
+$ kubectl auth can-i get pods -l app=api-server 
+```
+This will return `yes` or `no` according to your authorization.
+
+## Managing RBAC in Source Control
+kubectl command-line tool comes with a reconcile command that operates somewhat like kubectl apply. It will reconcile our 
+text based set of roles (rbac yaml config file) and role bindings with the current state of the cluster. 
+
+```shell
+$ kubectl auth reconcile -f some-rbac-config.yaml
+```
+
+It will reconcile the data of the file with the cluster. If you want to see the changes before they are made, you can add the 
+`--dry-run` flag to the command to print but not submit the changes.
+
+## Advanced Topics
+### Aggregating Cluster Roles
+### Using Groups for Binding
