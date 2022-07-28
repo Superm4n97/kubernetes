@@ -168,3 +168,12 @@ $ kubectl rollout status daemonSets my-daemon-set
 ```
 
 Some rollout command can be found in the _Up and Running_ **Deployment Rollout** section.
+
+### Context
+context is used for changing the default namespace permanently.
+```shell
+$ kubectl config set-context my-context --namespace=mystuff
+$ kubectl config use-context my-context
+```
+first line creates the new context, second line use the newly created
+context.

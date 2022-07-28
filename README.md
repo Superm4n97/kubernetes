@@ -1,35 +1,56 @@
-# Kubernetes
+* 0.Kubernetes Basics
+  * Architecture
+  * Cluster Component
+  * Kubernetes Component
+* 5.Pods
+  * Health Check
+  * Resource Management
+* 9.ReplicaSets
+  * Pod Auto Scaling
+* 10.Deployment
+  * Rollout
+* 11.DaemonSet
+* 12.Jobs
+  * One Shot
+  * Parallelism
+  * Work Queues
+  * CronJob
+* 13.ConfigMaps and Secrets
+* 14.Role Based Access Control(RBAC)
 
-## 1. ARCHITECTURE
+
+# 0. Kubernetes Basics
+
+## Architecture
 
 3 process must need to be installed on every node.
 1. Container Runtime (Docker, Kubelet (manage containers) etc.)
 2. Services. (Load balancing and communication)
 3. Kube Proxy 
 
-## 1.1 Master Node
-### 1.1.1 - API Server
+### Master Node
+#### API Server
 It is the center point of all sort of communication. Every request
 comes into the api server, and it forwards the request into the 
 responsible point.
 
-### 1.1.2 - etcd Cluster
+#### etcd Cluster
 It is the database of the system. It keeps the information about 
 the containers, pods and other things.
 
-### 1.1.3 - Controller Manager
+#### Controller Manager
 It checks whether actual_state = desired_state. It finds the 
 information about the actual state form the etcd cluster through the api server.
 It also sends the desired action that need to be taken to the api 
 server. 
 
-### 1.1.4 - Kube Scheduler
+#### Kube Scheduler
 It takes all the actions, it performs the specific task that 
 has been told from the api server. It does not take any decision, 
 it just performs the actions. 
 
-## 1.2 Worker Node
-### 1.2.1 - POD 
+### Worker Node
+#### POD 
 POD is the smallest unit of kubernetes. POD contains containers
 inside it. A pod contains an ip address. A pod can have more than
 one container, but the best practice is to keep a single container 
@@ -37,33 +58,101 @@ in a pod. The containers inside the pod are tightly coupled, so
 whenever a container fails all the container fails, and the pod is
 killed. Again only the pods consist of ip address not the containers.
 
-### 1.2.2 - Kubelet
+#### Kubelet
 It manages the pods. Kubelet controls the pods also the containers
 inside the pods. If a pod or a container needs to be created or 
 deleted kubelet does it.
 
-### 1.2.3 - Kube Proxy
+#### Kube Proxy
 it provides ip addresses to the specific pods. When a new pod is 
 created kube proxy provides a new ip address to that pod.
 
 
-## 1.3 kubectl
+#### kubectl
 kubectl uses for interacting with api server. The admin or user both
 need to access api server to fulfill their purpose. 
 
-### Context
-context is used for changing the default namespace permanently. 
 
-> $ kubectl config set-context my-context --namespace=mystuff <br>
-> $ kubectl config use-context my-context
 
-first line creates the new context, second line use the newly created
-context.
+## Cluster Component
+### Kubernetes Proxy
+kubernetes proxy is responsible for routing network traffic to
+load-balanced service in the cluster. For load balancing
+proxy must be present on every node. If the cluster runs the
+Kubernetes proxy with Daemonset, we can inspect the proxy as:
+>$ kubectl get daemonSets --namespace=kube-system kube-proxy
 
-# Basic Commands
+### Kubernetes DNS
+DNS server is like a dictionary of a cluster, it stores the
+information of naming and location of a specific service. <br>
+It provides naming and discovery for the service that are defined
+in the cluster. Depending on the size of the cluster there could
+be one or more DNS servers. <br>
 
-# Health Check
-## Liveness Probe:
+### Kubernetes UI
+```shell
+$ kubectl proxy
+```
+
+It starts up a proxy server to access the UI. The server starts
+on `localhost:8001`
+
+## Kubernetes Component
+### POD
+POD is the basic component of kubernetes. POD consists of containers inside it.
+Usually we put a single container inside a POD. POD gets an internal ip address. POD's
+communicate among themselves with that ip address.
+
+### Service
+POD's dies rapidly, so when a new pod is created a new ip should need to assign
+along it which is pretty inconvenient. Here comes the concept of services. Service is
+a static ip address that is attached along each pod. Lifecycles of a service and pod
+are not connected, so when a pod dies service remains along with it's ip address.
+Pods communicate with each other with service.<br>
+
+Service has 2 functionalities:<br>
+1. Permanent IP address
+2. Load balancer
+### Ingress
+Service is divided into two categories, Internal and External. User request first
+goes to ingress then the request is forwarded according to the service.
+
+### ConfigMap
+ConfigMap contains some mapped information. Suppose we need to access a pod using
+its service, if we change the name of the service then we again need to push and
+pull that pod. Instead of this we can use a generic configuration mapping that we do
+not need to change the whole thing.
+
+### Secret
+Secret is also a map, but the values in secret is stored in base64 encoded.
+Secret is used to store the credentials and authentication information.
+
+### Volume
+When a container is declared, if it stores data, when the container will restart
+everything will be gone. so to store data permanently we use volumes along the
+pods to store data. The volume is mounted by the developer to some external local
+storage.
+
+### Deployment
+Suppose a single pod application, when the application dies m the user will
+have a downtime of a server which is a bad user experience. <br>
+Here comes the main advantage of the distribution system. In the distribution system we
+can have many replicas of a single application. In kubernetes to create another application
+replica we do not need to create another node. Instead of that we can make a
+blueprint and specify there how many copy we want. This blueprint is called
+deployment. So deployment is a script, using which we can create as many application
+replica as we want. So we basically create deployment and deployment will create pods.
+>deployment -> pods -> container
+
+### StatefulSet
+Multiple deployments can not be created for stateful set like database, because
+replica pods access volume concurrently. This is why database type of pods  
+need to be created by statefulSet instead of deploy.
+
+# 5. Pods
+## Health Check
+
+### Liveness Probe:
 Liveness probe is a segment of yaml code that continuously checks if the 
 server container is live or not. It should be written for each of the object separately.
 #### why it is used? 
@@ -97,79 +186,6 @@ spec:
 #### Readiness Probe:
 It checks if the server is ready to serve the client or not. 
 
-## CLUSTER COMPONENTS
-### Kubernetes Proxy
-kubernetes proxy is responsible for routing network traffic to
-load-balanced service in the cluster. For load balancing 
-proxy must be present on every node. If the cluster runs the 
-Kubernetes proxy with Daemonset, we can inspect the proxy as:
->$ kubectl get daemonSets --namespace=kube-system kube-proxy
-
-### Kubernetes DNS
-DNS server is like a dictionary of a cluster, it stores the
-information of naming and location of a specific service. <br>
-It provides naming and discovery for the service that are defined
-in the cluster. Depending on the size of the cluster there could 
-be one or more DNS servers. <br>
-
-### Kubernetes UI
-> $ kubectl proxy
-
-It starts up a proxy server to access the UI. The server starts 
-on _localhost:8001_
-
-## KUBERNETES COMPONENTS
-### POD
-POD is the basic component of kubernetes. POD consists of containers inside it.
-Usually we put a single container inside a POD. POD gets an internal ip address. POD's 
-communicate among themselves with that ip address.
-
-### Service
-POD's dies rapidly, so when a new pod is created a new ip should need to assign 
-along it which is pretty inconvenient. Here comes the concept of services. Service is
-a static ip address that is attached along each pod. Lifecycles of a service and pod 
-are not connected, so when a pod dies service remains along with it's ip address. 
- Pods communicate with each other with service.<br>
-
-Service has 2 functionalities:<br>
-1. Permanent IP address
-2. Load balancer
-### Ingress
-Service is divided into two categories, Internal and External. User request first 
-goes to ingress then the request is forwarded according to the service. 
-
-### ConfigMap
-ConfigMap contains some mapped information. Suppose we need to access a pod using 
-its service, if we change the name of the service then we again need to push and 
-pull that pod. Instead of this we can use a generic configuration mapping that we do 
-not need to change the whole thing. 
-
-### Secret
-Secret is also a map, but the values in secret is stored in base64 encoded.
-Secret is used to store the credentials and authentication information. 
-
-### Volume
-When a container is declared, if it stores data, when the container will restart 
-everything will be gone. so to store data permanently we use volumes along the 
-pods to store data. The volume is mounted by the developer to some external local 
-storage. 
-
-### Deployment
-Suppose a single pod application, when the application dies m the user will 
-have a downtime of a server which is a bad user experience. <br>
-Here comes the main advantage of the distribution system. In the distribution system we 
-can have many replicas of a single application. In kubernetes to create another application 
-replica we do not need to create another node. Instead of that we can make a 
-blueprint and specify there how many copy we want. This blueprint is called 
-deployment. So deployment is a script, using which we can create as many application
-replica as we want. So we basically create deployment and deployment will create pods.
->deployment -> pods -> container
-
-### StatefulSet
-Multiple deployments can not be created for stateful set like database, because 
-replica pods access volume concurrently. This is why database type of pods  
-need to be created by statefulSet instead of deploy. 
-
 ## Resource Management
 ### Resource Requests and Limits:
 It specifies how much resource a pod will consume. 
@@ -199,17 +215,22 @@ Suppose that we create a Pod with this container that requests 0.5 CPU. Kubernet
 schedules this Pod onto a machine with a total of 2 CPU cores.
 As long as it is the only Pod on the machine, it will consume all 2.0 of 
 the available cores, despite only requesting 0.5 CPU. <br>
+
 If a second Pod with the same container and the same request of 0.5 CPU lands on
 the machine, then each Pod will receive 1.0 cores.<br>
+
 If a third identical Pod is scheduled, each Pod will receive 0.66 cores.<br>
 Finally, if a fourth identical Pod is scheduled, each Pod will receive the 0.5 core it requested, and
 the node will be at capacity.<br><br>
 
-**_request_ sets the lower bound of the resource that the application will consume, 
-we can also set the higher bound of the resource by using _limits_. It will specify
- the maximum amount of resource that the pod will use** <br>
+`request`
+<span style="color:orange">
+sets the lower bound of the resource that the application will consume, 
+we can also set the higher bound of the resource by using `limits`. It will specify
+ the maximum amount of resource that the pod will use.
+</span>
 
-by using _requests_ and _limits_ we can specify the resource interval of a 
+by using `requests` and `limits` we can specify the resource interval of a 
 pod.
 ### Volume Mount:
 ```yaml
@@ -344,6 +365,8 @@ spec.revisionHistoryLimit = 14
 ## Deployment Strategies
 ### Recreate Strategy
 ### RollingUpdate Strategy
+
+
 ## Monitoring a Deployment
 It monitors whether a deployment is dead or not.
 spec.progressDeadlineSecond sets the time that how long the progress will be dead. 
