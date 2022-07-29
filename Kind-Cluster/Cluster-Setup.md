@@ -21,6 +21,12 @@ nodes:
 EOF
 ```
 
+use the command below to set up the nginx proxy.
+```shell
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+```
+This proxy will carry a request from ingress port to the respective server.
+
 ### Cluster with Multiple nodes:
 ```yaml
 kind: Cluster

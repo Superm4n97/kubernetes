@@ -1,7 +1,4 @@
-# OSI and TCP models
-# Networking in Linux
-
-    This Chapter contains:
+    2. Linux Networking
     * The Network Interface
     * The Bridge Interface
     * Packet Handeling in karnel
@@ -24,7 +21,68 @@
         * Openssl
         * cURL
 
-### Netfilter
+    3. Container Networking Basics
+    * Introduction to container
+        * Applicaion
+        * Hypervisor
+        * Containers
+    * Container Premitives
+        * Control Groups
+        * Namespaces
+    * Container Network Basics
+        * Docker Networking model
+        * Overlay Networking
+        * Container Network Interface
+    * Container Connectivity
+        * Container to Container
+        * Container to Container Separate Hosts
+
+    4. Kubernetes Network introduction
+    * The Kubernetes networking model
+    * Node and Pod network layout
+        * isolated network
+        * flat network
+        * island network
+        * kube-controller-manager configuration
+    * The Kubelet
+    * Pod Readiness and Probes
+    * The CNI specification
+    * CNI Plugins
+        * The IPAM Interface
+        * Popular CNI plugins
+            * Cilium
+            * Flannel
+            * Calico
+    * kube-proxy
+        * userspace Mode
+        * iptables Mode
+        * ipvs Mode
+        * kernelspace Mode
+    * NetworkPolicy
+        * NetworkPolicy Example with Cilium
+        * Selecting Pods
+        * Rules
+    * DNS
+    * IPv4/IPv6 Dual Stack
+    
+    5. Kubernetes Network Abstruction
+    * StatefulSets
+    * Endpoints
+    * Endpoints Slices
+    * Kubernetes Services
+        * NodePort
+        * ClusterIP
+        * Headless
+        * ExternalName Service
+        * LoadBalancer
+        * Services Conclusion
+    * Ingress
+    * Ingress Controllers and Rules
+    * Service Meshes
+
+# 1. OSI and TCP models
+# 2. Networking in Linux
+## Netfilter
 ![netfilter hooks](netfilter.png)
 There are mainly five types of hooks
 1. NF_IP_PRE_ROUTING
@@ -71,21 +129,6 @@ You van create load balancers by running:
 > $ ipvsadm -A -t <'address'> -s <'mode'>
 
 # 3. Container Networking Basics
-    This Chapter contains:
-    * Introduction to container
-        * Applicaion
-        * Hypervisor
-        * Containers
-    * Container Premitives
-        * Control Groups
-        * Namespaces
-    * Container Network Basics
-        * Docker Networking model
-        * Overlay Networking
-        * Container Network Interface
-    * Container Connectivity
-        * Container to Container
-        * Container to Container Separate Hosts
 ## Introduction
 ### Hypervisor
 Hypervisor is a way to increase one host machine's efficiency and remove 
@@ -170,33 +213,6 @@ some other modes are: **None, Macvlan, IPvlan, Overlay, Custom.**
 
 
 # 4. Kubernetes Networking Introduction
-    * The Kubernetes networking model
-    * Node and Pod network layout
-        * isolated network
-        * flat network
-        * island network
-        * kube-controller-manager configuration
-    * The Kubelet
-    * Pod Readiness and Probes
-    * The CNI specification
-    * CNI Plugins
-        * The IPAM Interface
-        * Popular CNI plugins
-            * Cilium
-            * Flannel
-            * Calico
-    * kube-proxy
-        * userspace Mode
-        * iptables Mode
-        * ipvs Mode
-        * kernelspace Mode
-    * NetworkPolicy
-        * NetworkPolicy Example with Cilium
-        * Selecting Pods
-        * Rules
-    * DNS
-    * IPv4/IPv6 Dual Stack
-
 Kubernetes looks to solve these four issues:
 1. Highly coupled container-to-container communication
 2. Pod-to-Pod communication
@@ -334,20 +350,6 @@ If None then the developer will have to specify name servers in the pod spec
 
 
 # 5. Kubernetes Networking Abstractions
-    * StatefulSets
-    * Endpoints
-    * Endpoints Slices
-    * Kubernetes Services
-        * NodePort
-        * ClusterIP
-        * Headless
-        * ExternalName Service
-        * LoadBalancer
-        * Services Conclusion
-    * Ingress
-    * Ingress Controllers and Rules
-    * Service Meshes
-
 ## StatefulSet
 A StatefulSet must contain a service with it.<br>
 Stateful set creates pod like deployment but instead of unknown pod name like deployment it creates the pods with a 
@@ -460,6 +462,28 @@ of the service. You can read more about Nodeport [here](https://github.com/Super
 ### ClusterIP
 * Can only be accessible within the cluster.
 * Default type service
+* Only internal access. No External
+
+If we use clusterIp services we have to use ingress to interact with external source. The ClusterIP service must contain 
+a valid ip address from the CIDR service-cluster-ip-range, The ip address can be set manually, but if unset the 
+`.spec.clusterIP` unset, then it will automatically choose a valid ip address. <br>
+
+kube-proxy is responsible for making ClusterIP service address route to all applicable pod, means transferring a request 
+from clusterIP service to pod is done by kube-proxy
+
+#### Basic structure of clusterIP
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: #name of the service
+spec:
+  selector:
+    app: #it should be the label of the pod
+  ports:
+  - port: #service port, request will come to ip_address:this_port
+    targetPort: #containerPort, the port that is exposed by a container to the pod
+```
 
 ### ExternalName
 * Uses dns names instead of selectors
@@ -478,6 +502,37 @@ of the service. You can read more about Nodeport [here](https://github.com/Super
 There are two component of Ingress:
 * **Controller** : manage ingress pods
 * **Rules** : define how the traffic is routed.
+
+#### Basic Ingress format:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: #Ingress name
+spec:
+  rules:
+  - host: a.example.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: service-a #service name
+            port:
+              number: #service port number
+  - host: b.example.com
+    http:
+      paths:
+        - pathType: Prefix
+          path: "/" #selects all paths
+          backend:
+            service:
+              name: service-b #service name
+              port:
+                number: #service port number
+```
 
 ### Controller
 In kubernetes controller is a software that is responsible for managing typical 

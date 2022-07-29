@@ -177,3 +177,23 @@ $ kubectl config use-context my-context
 ```
 first line creates the new context, second line use the newly created
 context.
+
+# Database Create
+1. Run mysql database
+2. 
+```shell
+kubectl exec -ti test-sts-0 bash
+```
+to exec into the pod.<br>
+Now you are in the pod in using bash.
+
+3.
+You can see the environment variables using the along with the username and pass
+```shell
+env
+```
+4.
+you can login into mysql using 
+```shell
+mysql u root -p 
+```

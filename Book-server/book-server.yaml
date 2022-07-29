@@ -1,3 +1,4 @@
+#deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,7 +6,7 @@ metadata:
   labels:
     apiServer: book-server-dep
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: book-api-server
@@ -21,3 +22,17 @@ spec:
         - containerPort: 8080
 
 ---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-api-server
+  labels:
+    app: book-api-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 8080
+  selector:
+    app: book-api-server #selects the pod above

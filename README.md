@@ -153,8 +153,8 @@ need to be created by statefulSet instead of deploy.
 # 5. Pods
 ## Health Check
 
-### Liveness Probe:
-Liveness probe is a segment of yaml code that continuously checks if the 
+### Liveliness Probe:
+Liveliness probe is a segment of yaml code that continuously checks if the 
 server container is live or not. It should be written for each of the object separately.
 #### why it is used? 
 Kubernetes only checks if the server is running or not, if not then kubernetes 
