@@ -1,3 +1,5 @@
+This server is created using kubectl and yamls.
+
 ### 1. Create Image
 * Create a server
 * Dockerized it
