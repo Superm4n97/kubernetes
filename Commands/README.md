@@ -1,4 +1,4 @@
-### How to exec pod
+### Exec pod
 ```shell
 $ kubectl exec -ti POD_NAME INTERFACE
 $ kc exec -ti kuard-config sh
@@ -12,6 +12,21 @@ $ kubectl logs -f POD_NAME
 $ kc logs -f kuard-config
 ```
 The command shows the log information of the pod.
+
+### All resources
+```shell
+$ kubectl api-resources
+$ kubectl api-resources --namespaced=true
+```
+Gives you all the resources in your cluster. Enabling `--namespaced=true` flag will give all the resources that works within 
+a namespace. 
+
+
+### All versions
+```shell
+$ kubectl api-versions
+```
+
 
 ### Get output in YAML
 ```shell
